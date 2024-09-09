@@ -354,6 +354,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             title: 'Cloudy',
                             fontSize: 24,
                           ),
+                          const SizedBox(height: 24),
                           Table(
                             columnWidths: const {
                               0: IntrinsicColumnWidth(),
