@@ -1,13 +1,13 @@
 import 'dart:ui';
 
 import 'package:fernand_weather_forecast/core/constant/colors.dart';
-import 'package:fernand_weather_forecast/presentation/home/cubit/cubit/get_weather_cubit.dart';
 import 'package:fernand_weather_forecast/presentation/home/pages/detail_weather_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
+import '../cubit/get_weather/get_weather_cubit.dart';
 import '../widgets/text_shadow.dart';
 import 'search_location_screen.dart';
 

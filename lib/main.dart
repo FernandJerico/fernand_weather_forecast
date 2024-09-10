@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'data/datasources/weather_remote_datasource.dart';
-import 'presentation/home/cubit/cubit/get_weather_cubit.dart';
+import 'presentation/home/cubit/get_weather/get_weather_cubit.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
