@@ -3,11 +3,9 @@ import 'dart:ui';
 import 'package:fernand_weather_forecast/core/constant/colors.dart';
 import 'package:fernand_weather_forecast/presentation/home/cubit/cubit/get_weather_cubit.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:location/location.dart';
 
 import 'search_location_screen.dart';
 
@@ -25,7 +23,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    getCurrentPosition();
     if (widget.latitude != null &&
         widget.longitude != null &&
         widget.cityName == null) {
@@ -35,54 +32,6 @@ class _HomeScreenState extends State<HomeScreen> {
           );
     } else if (widget.cityName != null) {
       context.read<GetWeatherCubit>().getWeatherByName(widget.cityName!);
-    } else {
-      context
-          .read<GetWeatherCubit>()
-          .getWeather(latitude ?? -7.059662, longitude ?? 110.439135);
-    }
-  }
-
-  double? latitude;
-  double? longitude;
-
-  Future<void> getCurrentPosition() async {
-    try {
-      Location location = Location();
-
-      bool serviceEnabled;
-      PermissionStatus permissionGranted;
-      LocationData locationData;
-
-      serviceEnabled = await location.serviceEnabled();
-      if (!serviceEnabled) {
-        serviceEnabled = await location.requestService();
-        if (!serviceEnabled) {
-          return;
-        }
-      }
-
-      permissionGranted = await location.hasPermission();
-      if (permissionGranted == PermissionStatus.denied) {
-        permissionGranted = await location.requestPermission();
-        if (permissionGranted != PermissionStatus.granted) {
-          return;
-        }
-      }
-
-      locationData = await location.getLocation();
-      latitude = locationData.latitude;
-      longitude = locationData.longitude;
-
-      setState(() {});
-    } on PlatformException catch (e) {
-      if (e.code == 'IO_ERROR') {
-        debugPrint(
-            'A network error occurred trying to lookup the supplied coordinates: ${e.message}');
-      } else {
-        debugPrint('Failed to lookup coordinates: ${e.message}');
-      }
-    } catch (e) {
-      debugPrint('An unknown error occurred: $e');
     }
   }
 
@@ -164,18 +113,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => SearchLocationScreen(
-                                        latitude: latitude,
-                                        longitude: longitude)));
+                                        latitude: widget.latitude,
+                                        longitude: widget.longitude)));
                           },
                           child: Row(
                             children: [
                               Image.asset('assets/icons/map.png'),
                               const SizedBox(width: 20),
                               Text(
-                                widget.cityName ??
+                                widget.cityName?.split(' ')[0] ??
                                     (widget.latitude != null
                                         ? widget.latitude!.toStringAsFixed(6)
-                                        : 'Latitude not available'),
+                                        : widget.latitude!.toStringAsFixed(6)),
                                 style: GoogleFonts.overpass(
                                   fontSize: 24,
                                   fontWeight: FontWeight.w700,

@@ -1,9 +1,15 @@
+// ignore_for_file: unused_field
+
+import 'dart:convert';
+
 import 'package:fernand_weather_forecast/presentation/home/pages/home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../../core/constant/colors.dart';
+import 'package:http/http.dart' as http;
 
 class SearchLocationScreen extends StatefulWidget {
   final double? latitude;
@@ -20,19 +26,30 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
   LatLng? _lastTappedLatLng;
   final Set<Marker> _markers = {};
 
+  Future<String?> getPlaceName(double lat, double lng) async {
+    final url =
+        'https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=${dotenv.env['API_KEY_MAPS']}';
+
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+
+      if (data['status'] == 'OK') {
+        return data['results'][0]['address_components'][2]['long_name'];
+      } else {
+        debugPrint('Error: ${data['status']}');
+        return null;
+      }
+    } else {
+      debugPrint('Failed to connect to Google Geocoding API');
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          if (_lastTappedLatLng != null) {
-            _mapController.animateCamera(
-              CameraUpdate.newLatLng(_lastTappedLatLng!),
-            );
-          }
-        },
-        child: const Icon(Icons.location_searching),
-      ),
       body: SafeArea(
         child: Stack(
           children: [
@@ -55,6 +72,7 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
                       onTap: (LatLng latLng) {
                         setState(() {
                           _lastTappedLatLng = latLng;
+
                           _markers.add(
                             Marker(
                               markerId: MarkerId(latLng.toString()),
@@ -162,21 +180,27 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
                             height: 50,
                             child: ListView.separated(
                                 itemBuilder: (context, index) {
-                                  return InkWell(
-                                    onTap: () {},
-                                    child: ListTile(
-                                      title: Text("Search $index"),
-                                      leading: const Icon(
-                                          Icons.watch_later_outlined),
-                                      onTap: () {},
-                                    ),
+                                  return ListTile(
+                                    title: const Text("Yogyakarta"),
+                                    leading:
+                                        const Icon(Icons.watch_later_outlined),
+                                    onTap: () {
+                                      Navigator.pushReplacement(context,
+                                          MaterialPageRoute(
+                                        builder: (context) {
+                                          return const HomeScreen(
+                                            cityName: 'Yogyakarta',
+                                          );
+                                        },
+                                      ));
+                                    },
                                   );
                                 },
                                 separatorBuilder: (context, index) =>
                                     const SizedBox(
                                       height: 8,
                                     ),
-                                itemCount: 3),
+                                itemCount: 1),
                           ),
                         ],
                       )),
@@ -195,15 +219,20 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
         content: Text('Lat: ${latLng.latitude}\nLng: ${latLng.longitude}'),
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.pushReplacement(context, MaterialPageRoute(
-                builder: (context) {
-                  return HomeScreen(
-                    latitude: latLng.latitude,
-                    longitude: latLng.longitude,
-                  );
-                },
-              ));
+            onPressed: () async {
+              final cityName =
+                  await getPlaceName(latLng.latitude, latLng.longitude);
+              if (context.mounted) {
+                Navigator.pushReplacement(context, MaterialPageRoute(
+                  builder: (context) {
+                    return HomeScreen(
+                      cityName: cityName,
+                      latitude: latLng.latitude,
+                      longitude: latLng.longitude,
+                    );
+                  },
+                ));
+              }
             },
             child: const Text('Show Weather'),
           ),

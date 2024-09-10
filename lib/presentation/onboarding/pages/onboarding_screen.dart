@@ -1,11 +1,93 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:location/location.dart';
 
 import '../../../core/constant/colors.dart';
 import '../../home/pages/home_screen.dart';
+import 'package:http/http.dart' as http;
 
-class OnboardingScreen extends StatelessWidget {
+class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
+
+  @override
+  State<OnboardingScreen> createState() => _OnboardingScreenState();
+}
+
+class _OnboardingScreenState extends State<OnboardingScreen> {
+  @override
+  void initState() {
+    super.initState();
+    getCurrentPosition();
+  }
+
+  double? latitude;
+  double? longitude;
+
+  Future<void> getCurrentPosition() async {
+    try {
+      Location location = Location();
+
+      bool serviceEnabled;
+      PermissionStatus permissionGranted;
+      LocationData locationData;
+
+      serviceEnabled = await location.serviceEnabled();
+      if (!serviceEnabled) {
+        serviceEnabled = await location.requestService();
+        if (!serviceEnabled) {
+          return;
+        }
+      }
+
+      permissionGranted = await location.hasPermission();
+      if (permissionGranted == PermissionStatus.denied) {
+        permissionGranted = await location.requestPermission();
+        if (permissionGranted != PermissionStatus.granted) {
+          return;
+        }
+      }
+
+      locationData = await location.getLocation();
+      latitude = locationData.latitude;
+      longitude = locationData.longitude;
+
+      setState(() {});
+    } on PlatformException catch (e) {
+      if (e.code == 'IO_ERROR') {
+        debugPrint(
+            'A network error occurred trying to lookup the supplied coordinates: ${e.message}');
+      } else {
+        debugPrint('Failed to lookup coordinates: ${e.message}');
+      }
+    } catch (e) {
+      debugPrint('An unknown error occurred: $e');
+    }
+  }
+
+  Future<String?> getPlaceName(double lat, double lng) async {
+    final url =
+        'https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=${dotenv.env['API_KEY_MAPS']}';
+
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+
+      if (data['status'] == 'OK') {
+        return data['results'][0]['address_components'][2]['long_name'];
+      } else {
+        debugPrint('Error: ${data['status']}');
+        return null;
+      }
+    } else {
+      debugPrint('Failed to connect to Google Geocoding API');
+      return null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,13 +142,23 @@ class OnboardingScreen extends StatelessWidget {
                   width: double.infinity,
                   height: 64,
                   child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const HomeScreen(),
-                        ),
-                      );
+                    onPressed: () async {
+                      final cityName =
+                          await getPlaceName(latitude!, longitude!);
+                      if (context.mounted) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return HomeScreen(
+                                cityName: cityName,
+                                latitude: latitude,
+                                longitude: longitude,
+                              );
+                            },
+                          ),
+                        );
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
