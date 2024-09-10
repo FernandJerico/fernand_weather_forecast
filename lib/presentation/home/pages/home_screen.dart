@@ -2,11 +2,13 @@ import 'dart:ui';
 
 import 'package:fernand_weather_forecast/core/constant/colors.dart';
 import 'package:fernand_weather_forecast/presentation/home/cubit/cubit/get_weather_cubit.dart';
+import 'package:fernand_weather_forecast/presentation/home/pages/detail_weather_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
+import '../widgets/text_shadow.dart';
 import 'search_location_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -598,68 +600,47 @@ class _HomeScreenState extends State<HomeScreen> {
                 left: 80,
                 right: 80,
                 bottom: 40,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 28, vertical: 20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Weather Details',
-                        style: GoogleFonts.overpass(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w400,
-                            color: AppColors.darkBlue),
+                child: InkWell(
+                  child: SizedBox(
+                      child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                      const SizedBox(width: 10),
-                      const Icon(
-                        Icons.arrow_forward_ios,
-                        color: AppColors.darkBlue,
-                        size: 18,
-                      ),
-                    ],
-                  ),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 28, vertical: 20),
+                      backgroundColor: Colors.white,
+                      elevation: 0,
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const DetailWeatherScreen(),
+                          ));
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Weather Details',
+                          style: GoogleFonts.overpass(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w400,
+                              color: AppColors.darkBlue),
+                        ),
+                        const SizedBox(width: 10),
+                        const Icon(
+                          Icons.arrow_forward_ios,
+                          color: AppColors.darkBlue,
+                          size: 18,
+                        ),
+                      ],
+                    ),
+                  )),
                 ))
           ],
         ),
-      ),
-    );
-  }
-}
-
-class TextShadow extends StatelessWidget {
-  final String title;
-  final double fontSize;
-  const TextShadow({
-    super.key,
-    required this.title,
-    required this.fontSize,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: GoogleFonts.overpass(
-        fontSize: fontSize,
-        fontWeight: FontWeight.w400,
-        color: Colors.white,
-        shadows: [
-          const Shadow(
-            offset: Offset(-2.0, 3.0),
-            blurRadius: 1.0,
-            color: Color(0x1A000000),
-          ),
-          const Shadow(
-            offset: Offset(-1.0, 1.0),
-            blurRadius: 2.0,
-            color: Color(0x40FFFFFF),
-          ),
-        ],
       ),
     );
   }
