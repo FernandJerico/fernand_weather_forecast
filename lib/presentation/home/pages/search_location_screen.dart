@@ -1,3 +1,4 @@
+import 'package:fernand_weather_forecast/presentation/home/pages/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -14,19 +15,24 @@ class SearchLocationScreen extends StatefulWidget {
 }
 
 class _SearchLocationScreenState extends State<SearchLocationScreen> {
-  void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
-  }
+  TextEditingController searchController = TextEditingController();
+  late GoogleMapController _mapController;
+  LatLng? _lastTappedLatLng;
+  final Set<Marker> _markers = {};
 
-  late GoogleMapController mapController;
   @override
   Widget build(BuildContext context) {
-    LatLng center = LatLng(widget.latitude ?? 0, widget.longitude ?? 0);
-    Marker marker = Marker(
-      markerId: const MarkerId("marker_1"),
-      position: LatLng(widget.latitude ?? 0, widget.longitude ?? 0),
-    );
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          if (_lastTappedLatLng != null) {
+            _mapController.animateCamera(
+              CameraUpdate.newLatLng(_lastTappedLatLng!),
+            );
+          }
+        },
+        child: const Icon(Icons.location_searching),
+      ),
       body: SafeArea(
         child: Stack(
           children: [
@@ -38,12 +44,32 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
                       ),
                     )
                   : GoogleMap(
-                      onMapCreated: _onMapCreated,
+                      onMapCreated: (GoogleMapController controller) {
+                        _mapController = controller;
+                      },
                       initialCameraPosition: CameraPosition(
-                        target: center,
+                        target: LatLng(widget.latitude!, widget.longitude!),
                         zoom: 18.0,
                       ),
-                      markers: {marker},
+                      markers: _markers,
+                      onTap: (LatLng latLng) {
+                        setState(() {
+                          _lastTappedLatLng = latLng;
+                          _markers.add(
+                            Marker(
+                              markerId: MarkerId(latLng.toString()),
+                              position: latLng,
+                              infoWindow: InfoWindow(
+                                title:
+                                    'Lat: ${latLng.latitude}, Lng: ${latLng.longitude}',
+                              ),
+                              icon: BitmapDescriptor.defaultMarker,
+                            ),
+                          );
+                        });
+
+                        _showCoordinatesDialog(latLng);
+                      },
                     ),
             ),
             Positioned(
@@ -51,7 +77,8 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
                 left: 0,
                 right: 0,
                 child: Container(
-                  padding: const EdgeInsets.only(top: 32, left: 16, right: 16),
+                  padding: const EdgeInsets.only(
+                      top: 32, left: 16, right: 16, bottom: 16),
                   decoration: const BoxDecoration(
                     color: AppColors.white,
                     borderRadius: BorderRadius.only(
@@ -65,44 +92,63 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 4),
-                            decoration: BoxDecoration(
-                                color: AppColors.white,
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColors.gray.withOpacity(0.2),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ]),
-                            child: Row(
-                              children: [
-                                Row(
-                                  children: [
-                                    IconButton(
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        },
-                                        icon: const Icon(
-                                            Icons.arrow_back_rounded)),
-                                    Text(
-                                      "Search here",
-                                      style: GoogleFonts.overpass(
-                                        color: AppColors.gray,
-                                        fontSize: 16,
-                                      ),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 4),
+                              decoration: BoxDecoration(
+                                  color: AppColors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppColors.gray.withOpacity(0.2),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 2),
                                     ),
-                                  ],
-                                ),
-                                const Spacer(),
-                                IconButton(
+                                  ]),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Row(
+                                      children: [
+                                        IconButton(
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                          icon: const Icon(
+                                              Icons.arrow_back_rounded),
+                                        ),
+                                        Expanded(
+                                          child: TextFormField(
+                                            onFieldSubmitted: (value) {
+                                              Navigator.pushReplacement(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        HomeScreen(
+                                                      cityName:
+                                                          searchController.text,
+                                                    ),
+                                                  ));
+                                            },
+                                            controller: searchController,
+                                            decoration: InputDecoration(
+                                              hintText: 'Search here',
+                                              border: InputBorder.none,
+                                              hintStyle: GoogleFonts.overpass(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: AppColors.gray),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  IconButton(
                                     onPressed: () {},
-                                    icon: const Icon(Icons.mic)),
-                              ],
-                            ),
-                          ),
+                                    icon: const Icon(Icons.mic),
+                                  ),
+                                ],
+                              )),
                           const SizedBox(height: 32),
                           Text(
                             'Recent search',
@@ -113,7 +159,7 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
                           ),
                           const SizedBox(height: 16),
                           SizedBox(
-                            height: 200,
+                            height: 50,
                             child: ListView.separated(
                                 itemBuilder: (context, index) {
                                   return InkWell(
@@ -137,6 +183,31 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
                 )),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showCoordinatesDialog(LatLng latLng) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Coordinates'),
+        content: Text('Lat: ${latLng.latitude}\nLng: ${latLng.longitude}'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pushReplacement(context, MaterialPageRoute(
+                builder: (context) {
+                  return HomeScreen(
+                    latitude: latLng.latitude,
+                    longitude: latLng.longitude,
+                  );
+                },
+              ));
+            },
+            child: const Text('Show Weather'),
+          ),
+        ],
       ),
     );
   }

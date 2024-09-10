@@ -12,7 +12,10 @@ import 'package:location/location.dart';
 import 'search_location_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final double? latitude;
+  final double? longitude;
+  final String? cityName;
+  const HomeScreen({super.key, this.latitude, this.longitude, this.cityName});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -23,9 +26,20 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     getCurrentPosition();
-    context
-        .read<GetWeatherCubit>()
-        .getWeather(latitude ?? -7.059662, longitude ?? 110.439135);
+    if (widget.latitude != null &&
+        widget.longitude != null &&
+        widget.cityName == null) {
+      context.read<GetWeatherCubit>().getWeather(
+            widget.latitude!,
+            widget.longitude!,
+          );
+    } else if (widget.cityName != null) {
+      context.read<GetWeatherCubit>().getWeatherByName(widget.cityName!);
+    } else {
+      context
+          .read<GetWeatherCubit>()
+          .getWeather(latitude ?? -7.059662, longitude ?? 110.439135);
+    }
   }
 
   double? latitude;
@@ -90,6 +104,14 @@ class _HomeScreenState extends State<HomeScreen> {
         return 'Light Fog';
       case 2001.0:
         return 'Fog';
+      case 4000.0:
+        return 'Drizzle';
+      case 4001.0:
+        return 'Rain';
+      case 4201.0:
+        return 'Heavy Rain';
+      case 4200.0:
+        return 'Light Rain';
       default:
         return 'Unknown Weather Code';
     }
@@ -149,57 +171,28 @@ class _HomeScreenState extends State<HomeScreen> {
                             children: [
                               Image.asset('assets/icons/map.png'),
                               const SizedBox(width: 20),
-                              BlocBuilder<GetWeatherCubit, GetWeatherState>(
-                                builder: (context, state) {
-                                  return state.maybeWhen(
-                                    orElse: () => Text(
-                                      'Semarang',
-                                      style: GoogleFonts.overpass(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.white,
-                                        shadows: [
-                                          const Shadow(
-                                            offset: Offset(-2.0, 3.0),
-                                            blurRadius: 1.0,
-                                            color: Color(0x1A000000),
-                                          ),
-                                          const Shadow(
-                                            offset: Offset(-1.0, 1.0),
-                                            blurRadius: 2.0,
-                                            color: Color(0x40FFFFFF),
-                                          ),
-                                        ],
-                                      ),
+                              Text(
+                                widget.cityName ??
+                                    (widget.latitude != null
+                                        ? widget.latitude!.toStringAsFixed(6)
+                                        : 'Latitude not available'),
+                                style: GoogleFonts.overpass(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                  shadows: [
+                                    const Shadow(
+                                      offset: Offset(-2.0, 3.0),
+                                      blurRadius: 1.0,
+                                      color: Color(0x1A000000),
                                     ),
-                                    loading: () =>
-                                        const CircularProgressIndicator(),
-                                    loaded: (getWeatherResponseModel) {
-                                      final location =
-                                          getWeatherResponseModel.location;
-                                      return Text(
-                                        location!.lat.toString(),
-                                        style: GoogleFonts.overpass(
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.w700,
-                                          color: Colors.white,
-                                          shadows: [
-                                            const Shadow(
-                                              offset: Offset(-2.0, 3.0),
-                                              blurRadius: 1.0,
-                                              color: Color(0x1A000000),
-                                            ),
-                                            const Shadow(
-                                              offset: Offset(-1.0, 1.0),
-                                              blurRadius: 2.0,
-                                              color: Color(0x40FFFFFF),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                  );
-                                },
+                                    const Shadow(
+                                      offset: Offset(-1.0, 1.0),
+                                      blurRadius: 2.0,
+                                      color: Color(0x40FFFFFF),
+                                    ),
+                                  ],
+                                ),
                               ),
                               const SizedBox(width: 16),
                               Image.asset('assets/icons/arrow-down.png'),
@@ -451,7 +444,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                     SizedBox(height: sizes.height * 0.025),
-                    Image.asset('assets/images/cloudy.png'),
+                    BlocBuilder<GetWeatherCubit, GetWeatherState>(
+                      builder: (context, state) {
+                        return Image.asset('assets/images/cloudy.png');
+                      },
+                    ),
                     SizedBox(height: sizes.height * 0.015),
                     BlocBuilder<GetWeatherCubit, GetWeatherState>(
                       builder: (context, state) {

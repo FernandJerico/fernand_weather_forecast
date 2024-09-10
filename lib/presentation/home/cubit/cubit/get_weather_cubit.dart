@@ -21,4 +21,13 @@ class GetWeatherCubit extends Cubit<GetWeatherState> {
       (r) => emit(GetWeatherState.loaded(r)),
     );
   }
+
+  getWeatherByName(String cityName) async {
+    emit(const GetWeatherState.loading());
+    final response = await _weatherRemoteDatasource.getWeatherByName(cityName);
+    response.fold(
+      (l) => emit(GetWeatherState.error(l)),
+      (r) => emit(GetWeatherState.loaded(r)),
+    );
+  }
 }
