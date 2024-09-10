@@ -1,9 +1,12 @@
 import 'dart:ui';
 
 import 'package:fernand_weather_forecast/core/constant/colors.dart';
+import 'package:fernand_weather_forecast/presentation/home/cubit/cubit/get_weather_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:location/location.dart';
 
 import 'search_location_screen.dart';
@@ -20,6 +23,9 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     getCurrentPosition();
+    context
+        .read<GetWeatherCubit>()
+        .getWeather(latitude ?? -7.059662, longitude ?? 110.439135);
   }
 
   double? latitude;
@@ -66,8 +72,32 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  String getWeatherDescription(double weatherCode) {
+    switch (weatherCode) {
+      case 1000.0:
+        return 'Clear';
+      case 1100.0:
+        return 'Mostly Clear';
+      case 1101.0:
+        return 'Partly Cloudy';
+      case 1102.0:
+        return 'Mostly Cloudy';
+      case 1001.0:
+        return 'Cloudy';
+      case 1103.0:
+        return 'Mixed';
+      case 2100.0:
+        return 'Light Fog';
+      case 2001.0:
+        return 'Fog';
+      default:
+        return 'Unknown Weather Code';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final sizes = MediaQuery.of(context).size;
     return Scaffold(
       body: SafeArea(
         child: Stack(
@@ -119,25 +149,57 @@ class _HomeScreenState extends State<HomeScreen> {
                             children: [
                               Image.asset('assets/icons/map.png'),
                               const SizedBox(width: 20),
-                              Text(
-                                'Semarang',
-                                style: GoogleFonts.overpass(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white,
-                                  shadows: [
-                                    const Shadow(
-                                      offset: Offset(-2.0, 3.0),
-                                      blurRadius: 1.0,
-                                      color: Color(0x1A000000),
+                              BlocBuilder<GetWeatherCubit, GetWeatherState>(
+                                builder: (context, state) {
+                                  return state.maybeWhen(
+                                    orElse: () => Text(
+                                      'Semarang',
+                                      style: GoogleFonts.overpass(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.white,
+                                        shadows: [
+                                          const Shadow(
+                                            offset: Offset(-2.0, 3.0),
+                                            blurRadius: 1.0,
+                                            color: Color(0x1A000000),
+                                          ),
+                                          const Shadow(
+                                            offset: Offset(-1.0, 1.0),
+                                            blurRadius: 2.0,
+                                            color: Color(0x40FFFFFF),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                    const Shadow(
-                                      offset: Offset(-1.0, 1.0),
-                                      blurRadius: 2.0,
-                                      color: Color(0x40FFFFFF),
-                                    ),
-                                  ],
-                                ),
+                                    loading: () =>
+                                        const CircularProgressIndicator(),
+                                    loaded: (getWeatherResponseModel) {
+                                      final location =
+                                          getWeatherResponseModel.location;
+                                      return Text(
+                                        location!.lat.toString(),
+                                        style: GoogleFonts.overpass(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.w700,
+                                          color: Colors.white,
+                                          shadows: [
+                                            const Shadow(
+                                              offset: Offset(-2.0, 3.0),
+                                              blurRadius: 1.0,
+                                              color: Color(0x1A000000),
+                                            ),
+                                            const Shadow(
+                                              offset: Offset(-1.0, 1.0),
+                                              blurRadius: 2.0,
+                                              color: Color(0x40FFFFFF),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
                               ),
                               const SizedBox(width: 16),
                               Image.asset('assets/icons/arrow-down.png'),
@@ -388,90 +450,199 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: sizes.height * 0.025),
                     Image.asset('assets/images/cloudy.png'),
-                    const SizedBox(height: 32),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.7),
-                            width: 2,
-                          ),
-                          borderRadius: BorderRadius.circular(20),
-                          color: const Color(0xffBFBFBF).withOpacity(0.7)),
-                      child: Column(
-                        children: [
-                          const TextShadow(
-                            title: 'Today, 12 September',
-                            fontSize: 18,
-                          ),
-                          const TextShadow(
-                            title: '29 °',
-                            fontSize: 100,
-                          ),
-                          const TextShadow(
-                            title: 'Cloudy',
-                            fontSize: 24,
-                          ),
-                          const SizedBox(height: 24),
-                          Table(
-                            columnWidths: const {
-                              0: IntrinsicColumnWidth(),
-                              1: FixedColumnWidth(60),
-                              2: IntrinsicColumnWidth(),
-                            },
-                            children: [
-                              TableRow(
-                                children: [
-                                  Row(
-                                    children: [
-                                      Image.asset('assets/icons/wind.png'),
-                                      const SizedBox(width: 10),
-                                      const TextShadow(
-                                          title: 'Wind', fontSize: 18)
-                                    ],
+                    SizedBox(height: sizes.height * 0.015),
+                    BlocBuilder<GetWeatherCubit, GetWeatherState>(
+                      builder: (context, state) {
+                        return state.maybeWhen(
+                          orElse: () {
+                            return Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.7),
+                                    width: 2,
                                   ),
-                                  Text(
-                                    '|',
-                                    style: GoogleFonts.raleway(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 18,
-                                    ),
-                                    textAlign: TextAlign.center,
+                                  borderRadius: BorderRadius.circular(20),
+                                  color:
+                                      const Color(0xffBFBFBF).withOpacity(0.7)),
+                              child: Column(
+                                children: [
+                                  const TextShadow(
+                                    title: 'Today, 12 September',
+                                    fontSize: 18,
                                   ),
                                   const TextShadow(
-                                      title: '10 km/h', fontSize: 18)
-                                ],
-                              ),
-                              TableRow(
-                                children: [
-                                  Row(
+                                    title: '29 °',
+                                    fontSize: 100,
+                                  ),
+                                  const TextShadow(
+                                    title: 'Cloudy',
+                                    fontSize: 24,
+                                  ),
+                                  const SizedBox(height: 24),
+                                  Table(
+                                    columnWidths: const {
+                                      0: IntrinsicColumnWidth(),
+                                      1: FixedColumnWidth(60),
+                                      2: IntrinsicColumnWidth(),
+                                    },
                                     children: [
-                                      Image.asset('assets/icons/hum.png'),
-                                      const SizedBox(width: 10),
-                                      const TextShadow(
-                                          title: 'Hum', fontSize: 18)
+                                      TableRow(
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Image.asset(
+                                                  'assets/icons/wind.png'),
+                                              const SizedBox(width: 10),
+                                              const TextShadow(
+                                                  title: 'Wind', fontSize: 18)
+                                            ],
+                                          ),
+                                          Text(
+                                            '|',
+                                            style: GoogleFonts.raleway(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: 18,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                          const TextShadow(
+                                              title: '10 km/h', fontSize: 18)
+                                        ],
+                                      ),
+                                      TableRow(
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Image.asset(
+                                                  'assets/icons/hum.png'),
+                                              const SizedBox(width: 10),
+                                              const TextShadow(
+                                                  title: 'Hum', fontSize: 18)
+                                            ],
+                                          ),
+                                          Text(
+                                            '|',
+                                            style: GoogleFonts.raleway(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: 18,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                          const TextShadow(
+                                              title: '54 %', fontSize: 18)
+                                        ],
+                                      ),
                                     ],
-                                  ),
-                                  Text(
-                                    '|',
-                                    style: GoogleFonts.raleway(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 18,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  const TextShadow(title: '54 %', fontSize: 18)
+                                  )
                                 ],
                               ),
-                            ],
-                          )
-                        ],
-                      ),
+                            );
+                          },
+                          loaded: (getWeatherResponseModel) {
+                            final data = getWeatherResponseModel.data;
+
+                            return Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.7),
+                                    width: 2,
+                                  ),
+                                  borderRadius: BorderRadius.circular(20),
+                                  color:
+                                      const Color(0xffBFBFBF).withOpacity(0.7)),
+                              child: Column(
+                                children: [
+                                  TextShadow(
+                                    title:
+                                        'Today, ${DateFormat('dd MMMM').format(data!.time!)}',
+                                    fontSize: 18,
+                                  ),
+                                  TextShadow(
+                                    title:
+                                        '${data.values!['temperature']?.toStringAsFixed(1)} °',
+                                    fontSize: 100,
+                                  ),
+                                  TextShadow(
+                                    title: getWeatherDescription(
+                                        data.values!['weatherCode']!),
+                                    fontSize: 24,
+                                  ),
+                                  const SizedBox(height: 24),
+                                  Table(
+                                    columnWidths: const {
+                                      0: IntrinsicColumnWidth(),
+                                      1: FixedColumnWidth(60),
+                                      2: IntrinsicColumnWidth(),
+                                    },
+                                    children: [
+                                      TableRow(
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Image.asset(
+                                                  'assets/icons/wind.png'),
+                                              const SizedBox(width: 10),
+                                              const TextShadow(
+                                                  title: 'Wind', fontSize: 18)
+                                            ],
+                                          ),
+                                          Text(
+                                            '|',
+                                            style: GoogleFonts.raleway(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: 18,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                          TextShadow(
+                                              title:
+                                                  '${data.values!['windSpeed']!.toStringAsFixed(0)} mp/h',
+                                              fontSize: 18)
+                                        ],
+                                      ),
+                                      TableRow(
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Image.asset(
+                                                  'assets/icons/hum.png'),
+                                              const SizedBox(width: 10),
+                                              const TextShadow(
+                                                  title: 'Hum', fontSize: 18)
+                                            ],
+                                          ),
+                                          Text(
+                                            '|',
+                                            style: GoogleFonts.raleway(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: 18,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                          TextShadow(
+                                              title:
+                                                  '${data.values!['humidity']!.toStringAsFixed(0)} %',
+                                              fontSize: 18)
+                                        ],
+                                      ),
+                                    ],
+                                  )
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                      },
                     )
                   ],
                 ),

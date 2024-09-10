@@ -1,5 +1,9 @@
 import 'package:fernand_weather_forecast/presentation/onboarding/pages/onboarding_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'data/datasources/weather_remote_datasource.dart';
+import 'presentation/home/cubit/cubit/get_weather_cubit.dart';
 
 void main() {
   runApp(const MyApp());
@@ -10,14 +14,21 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Weather Forecast',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => GetWeatherCubit(WeatherRemoteDatasource()),
+        ),
+      ],
+      child: MaterialApp(
+        title: 'Weather Forecast',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          useMaterial3: true,
+        ),
+        home: const OnboardingScreen(),
       ),
-      home: const OnboardingScreen(),
     );
   }
 }
