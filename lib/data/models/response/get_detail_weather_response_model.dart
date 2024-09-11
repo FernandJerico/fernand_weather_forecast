@@ -161,8 +161,8 @@ class Values {
   final DateTime? moonriseTime;
   final DateTime? moonsetTime;
   final double? precipitationProbabilityAvg;
-  final int? precipitationProbabilityMax;
-  final int? precipitationProbabilityMin;
+  final double? precipitationProbabilityMax;
+  final double? precipitationProbabilityMin;
   final double? pressureSurfaceLevelAvg;
   final double? pressureSurfaceLevelMax;
   final double? pressureSurfaceLevelMin;
@@ -171,32 +171,32 @@ class Values {
   final double? rainAccumulationLweMax;
   final int? rainAccumulationLweMin;
   final double? rainAccumulationMax;
-  final int? rainAccumulationMin;
+  final double? rainAccumulationMin;
   final double? rainAccumulationSum;
   final double? rainIntensityAvg;
   final double? rainIntensityMax;
-  final int? rainIntensityMin;
-  final int? sleetAccumulationAvg;
-  final int? sleetAccumulationLweAvg;
-  final int? sleetAccumulationLweMax;
-  final int? sleetAccumulationLweMin;
-  final int? sleetAccumulationLweSum;
-  final int? sleetAccumulationMax;
-  final int? sleetAccumulationMin;
-  final int? sleetIntensityAvg;
-  final int? sleetIntensityMax;
-  final int? sleetIntensityMin;
-  final int? snowAccumulationAvg;
-  final int? snowAccumulationLweAvg;
-  final int? snowAccumulationLweMax;
-  final int? snowAccumulationLweMin;
-  final int? snowAccumulationLweSum;
-  final int? snowAccumulationMax;
-  final int? snowAccumulationMin;
-  final int? snowAccumulationSum;
-  final int? snowIntensityAvg;
-  final int? snowIntensityMax;
-  final int? snowIntensityMin;
+  final double? rainIntensityMin;
+  final double? sleetAccumulationAvg;
+  final double? sleetAccumulationLweAvg;
+  final double? sleetAccumulationLweMax;
+  final double? sleetAccumulationLweMin;
+  final double? sleetAccumulationLweSum;
+  final double? sleetAccumulationMax;
+  final double? sleetAccumulationMin;
+  final double? sleetIntensityAvg;
+  final double? sleetIntensityMax;
+  final double? sleetIntensityMin;
+  final double? snowAccumulationAvg;
+  final double? snowAccumulationLweAvg;
+  final double? snowAccumulationLweMax;
+  final double? snowAccumulationLweMin;
+  final double? snowAccumulationLweSum;
+  final double? snowAccumulationMax;
+  final double? snowAccumulationMin;
+  final double? snowAccumulationSum;
+  final double? snowIntensityAvg;
+  final double? snowIntensityMax;
+  final double? snowIntensityMin;
   final DateTime? sunriseTime;
   final DateTime? sunsetTime;
   final double? temperatureApparentAvg;
@@ -205,17 +205,17 @@ class Values {
   final double? temperatureAvg;
   final double? temperatureMax;
   final double? temperatureMin;
-  final int? uvHealthConcernAvg;
-  final int? uvHealthConcernMax;
-  final int? uvHealthConcernMin;
-  final int? uvIndexAvg;
-  final int? uvIndexMax;
-  final int? uvIndexMin;
+  final double? uvHealthConcernAvg;
+  final double? uvHealthConcernMax;
+  final double? uvHealthConcernMin;
+  final double? uvIndexAvg;
+  final double? uvIndexMax;
+  final double? uvIndexMin;
   final double? visibilityAvg;
   final double? visibilityMax;
   final double? visibilityMin;
-  final int? weatherCodeMax;
-  final int? weatherCodeMin;
+  final double? weatherCodeMax;
+  final double? weatherCodeMin;
   final double? windDirectionAvg;
   final double? windGustAvg;
   final double? windGustMax;
@@ -365,8 +365,10 @@ class Values {
             : DateTime.parse(json["moonsetTime"]),
         precipitationProbabilityAvg:
             json["precipitationProbabilityAvg"]?.toDouble(),
-        precipitationProbabilityMax: json["precipitationProbabilityMax"],
-        precipitationProbabilityMin: json["precipitationProbabilityMin"],
+        precipitationProbabilityMax:
+            json["precipitationProbabilityMax"]?.toDouble(),
+        precipitationProbabilityMin:
+            json["precipitationProbabilityMin"]?.toDouble(),
         pressureSurfaceLevelAvg: json["pressureSurfaceLevelAvg"]?.toDouble(),
         pressureSurfaceLevelMax: json["pressureSurfaceLevelMax"]?.toDouble(),
         pressureSurfaceLevelMin: json["pressureSurfaceLevelMin"]?.toDouble(),
@@ -375,32 +377,32 @@ class Values {
         rainAccumulationLweMax: json["rainAccumulationLweMax"]?.toDouble(),
         rainAccumulationLweMin: json["rainAccumulationLweMin"],
         rainAccumulationMax: json["rainAccumulationMax"]?.toDouble(),
-        rainAccumulationMin: json["rainAccumulationMin"],
+        rainAccumulationMin: json["rainAccumulationMin"]?.toDouble(),
         rainAccumulationSum: json["rainAccumulationSum"]?.toDouble(),
         rainIntensityAvg: json["rainIntensityAvg"]?.toDouble(),
         rainIntensityMax: json["rainIntensityMax"]?.toDouble(),
-        rainIntensityMin: json["rainIntensityMin"],
-        sleetAccumulationAvg: json["sleetAccumulationAvg"],
-        sleetAccumulationLweAvg: json["sleetAccumulationLweAvg"],
-        sleetAccumulationLweMax: json["sleetAccumulationLweMax"],
-        sleetAccumulationLweMin: json["sleetAccumulationLweMin"],
-        sleetAccumulationLweSum: json["sleetAccumulationLweSum"],
-        sleetAccumulationMax: json["sleetAccumulationMax"],
-        sleetAccumulationMin: json["sleetAccumulationMin"],
-        sleetIntensityAvg: json["sleetIntensityAvg"],
-        sleetIntensityMax: json["sleetIntensityMax"],
-        sleetIntensityMin: json["sleetIntensityMin"],
-        snowAccumulationAvg: json["snowAccumulationAvg"],
-        snowAccumulationLweAvg: json["snowAccumulationLweAvg"],
-        snowAccumulationLweMax: json["snowAccumulationLweMax"],
-        snowAccumulationLweMin: json["snowAccumulationLweMin"],
-        snowAccumulationLweSum: json["snowAccumulationLweSum"],
-        snowAccumulationMax: json["snowAccumulationMax"],
-        snowAccumulationMin: json["snowAccumulationMin"],
-        snowAccumulationSum: json["snowAccumulationSum"],
-        snowIntensityAvg: json["snowIntensityAvg"],
-        snowIntensityMax: json["snowIntensityMax"],
-        snowIntensityMin: json["snowIntensityMin"],
+        rainIntensityMin: json["rainIntensityMin"]?.toDouble(),
+        sleetAccumulationAvg: json["sleetAccumulationAvg"]?.toDouble(),
+        sleetAccumulationLweAvg: json["sleetAccumulationLweAvg"]?.toDouble(),
+        sleetAccumulationLweMax: json["sleetAccumulationLweMax"]?.toDouble(),
+        sleetAccumulationLweMin: json["sleetAccumulationLweMin"]?.toDouble(),
+        sleetAccumulationLweSum: json["sleetAccumulationLweSum"]?.toDouble(),
+        sleetAccumulationMax: json["sleetAccumulationMax"]?.toDouble(),
+        sleetAccumulationMin: json["sleetAccumulationMin"]?.toDouble(),
+        sleetIntensityAvg: json["sleetIntensityAvg"]?.toDouble(),
+        sleetIntensityMax: json["sleetIntensityMax"]?.toDouble(),
+        sleetIntensityMin: json["sleetIntensityMin"]?.toDouble(),
+        snowAccumulationAvg: json["snowAccumulationAvg"]?.toDouble(),
+        snowAccumulationLweAvg: json["snowAccumulationLweAvg"]?.toDouble(),
+        snowAccumulationLweMax: json["snowAccumulationLweMax"]?.toDouble(),
+        snowAccumulationLweMin: json["snowAccumulationLweMin"]?.toDouble(),
+        snowAccumulationLweSum: json["snowAccumulationLweSum"]?.toDouble(),
+        snowAccumulationMax: json["snowAccumulationMax"]?.toDouble(),
+        snowAccumulationMin: json["snowAccumulationMin"]?.toDouble(),
+        snowAccumulationSum: json["snowAccumulationSum"]?.toDouble(),
+        snowIntensityAvg: json["snowIntensityAvg"]?.toDouble(),
+        snowIntensityMax: json["snowIntensityMax"]?.toDouble(),
+        snowIntensityMin: json["snowIntensityMin"]?.toDouble(),
         sunriseTime: json["sunriseTime"] == null
             ? null
             : DateTime.parse(json["sunriseTime"]),
@@ -413,17 +415,17 @@ class Values {
         temperatureAvg: json["temperatureAvg"]?.toDouble(),
         temperatureMax: json["temperatureMax"]?.toDouble(),
         temperatureMin: json["temperatureMin"]?.toDouble(),
-        uvHealthConcernAvg: json["uvHealthConcernAvg"],
-        uvHealthConcernMax: json["uvHealthConcernMax"],
-        uvHealthConcernMin: json["uvHealthConcernMin"],
-        uvIndexAvg: json["uvIndexAvg"],
-        uvIndexMax: json["uvIndexMax"],
-        uvIndexMin: json["uvIndexMin"],
+        uvHealthConcernAvg: json["uvHealthConcernAvg"]?.toDouble(),
+        uvHealthConcernMax: json["uvHealthConcernMax"]?.toDouble(),
+        uvHealthConcernMin: json["uvHealthConcernMin"]?.toDouble(),
+        uvIndexAvg: json["uvIndexAvg"]?.toDouble(),
+        uvIndexMax: json["uvIndexMax"]?.toDouble(),
+        uvIndexMin: json["uvIndexMin"]?.toDouble(),
         visibilityAvg: json["visibilityAvg"]?.toDouble(),
         visibilityMax: json["visibilityMax"]?.toDouble(),
         visibilityMin: json["visibilityMin"]?.toDouble(),
-        weatherCodeMax: json["weatherCodeMax"],
-        weatherCodeMin: json["weatherCodeMin"],
+        weatherCodeMax: json["weatherCodeMax"]?.toDouble(),
+        weatherCodeMin: json["weatherCodeMin"]?.toDouble(),
         windDirectionAvg: json["windDirectionAvg"]?.toDouble(),
         windGustAvg: json["windGustAvg"]?.toDouble(),
         windGustMax: json["windGustMax"]?.toDouble(),
@@ -560,7 +562,7 @@ class Hourly {
 
 class Minutely {
   final DateTime? time;
-  final Map<String, double>? values;
+  final Map<String, double?>? values;
 
   Minutely({
     this.time,
@@ -573,13 +575,20 @@ class Minutely {
 
   factory Minutely.fromMap(Map<String, dynamic> json) => Minutely(
         time: json["time"] == null ? null : DateTime.parse(json["time"]),
-        values: Map.from(json["values"]!)
-            .map((k, v) => MapEntry<String, double>(k, v?.toDouble())),
+        values: json["values"] == null
+            ? null
+            : Map<String, double?>.from(
+                json["values"].map((k, v) => MapEntry<String, double?>(
+                      k,
+                      v?.toDouble(),
+                    )),
+              ),
       );
 
   Map<String, dynamic> toMap() => {
         "time": time?.toIso8601String(),
-        "values":
-            Map.from(values!).map((k, v) => MapEntry<String, dynamic>(k, v)),
+        "values": values == null
+            ? null
+            : Map.from(values!).map((k, v) => MapEntry<String, dynamic>(k, v)),
       };
 }

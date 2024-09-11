@@ -68,6 +68,12 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  double mphToKmph = 1.60934;
+
+  String convertMphToKmph(double mph) {
+    return '${(mph * mphToKmph).toStringAsFixed(0)} km/h';
+  }
+
   @override
   Widget build(BuildContext context) {
     final sizes = MediaQuery.of(context).size;
@@ -553,7 +559,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           ),
                                           TextShadow(
                                               title:
-                                                  '${data.values!['windSpeed']!.toStringAsFixed(0)} mp/h',
+                                                  '${convertMphToKmph(data.values!['windSpeed']!)} km/h',
                                               fontSize: 18)
                                         ],
                                       ),
@@ -616,7 +622,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const DetailWeatherScreen(),
+                            builder: (context) => DetailWeatherScreen(
+                              cityName: widget.cityName,
+                              latitude: widget.latitude,
+                              longitude: widget.longitude,
+                            ),
                           ));
                     },
                     child: Row(

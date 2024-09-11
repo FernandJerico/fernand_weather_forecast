@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'data/datasources/weather_remote_datasource.dart';
+import 'presentation/home/cubit/get_detail_weather/get_detail_weather_cubit.dart';
 import 'presentation/home/cubit/get_weather/get_weather_cubit.dart';
 
 void main() async {
@@ -21,6 +22,9 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider(
           create: (context) => GetWeatherCubit(WeatherRemoteDatasource()),
+        ),
+        BlocProvider(
+          create: (context) => GetDetailWeatherCubit(WeatherRemoteDatasource()),
         ),
       ],
       child: MaterialApp(
