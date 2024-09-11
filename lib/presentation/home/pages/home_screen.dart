@@ -558,8 +558,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                             textAlign: TextAlign.center,
                                           ),
                                           TextShadow(
-                                              title:
-                                                  '${convertMphToKmph(data.values!['windSpeed']!)} km/h',
+                                              title: convertMphToKmph(
+                                                  data.values!['windSpeed']!),
                                               fontSize: 18)
                                         ],
                                       ),
