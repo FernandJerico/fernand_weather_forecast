@@ -21,7 +21,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   void initState() {
     super.initState();
-    getCurrentPosition();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      getCurrentPosition();
+    });
   }
 
   double? latitude;
@@ -126,13 +128,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             right: 32,
             child: Column(
               children: [
-                Text('Never get caught\nin the rain again',
+                Text('Never get caught in the rain again',
                     style: GoogleFonts.overpass(
                         fontSize: 40,
                         fontWeight: FontWeight.w700,
                         color: AppColors.gray)),
                 const SizedBox(height: 8),
-                Text('Stay ahead of the weather with our accurate\nforecasts',
+                Text('Stay ahead of the weather with our accurate forecasts',
                     style: GoogleFonts.overpass(
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
@@ -143,17 +145,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   height: 64,
                   child: ElevatedButton(
                     onPressed: () async {
-                      final cityName =
-                          await getPlaceName(latitude!, longitude!);
+                      final cityName = await getPlaceName(
+                          latitude ?? -7.059662, longitude ?? 110.439135);
                       if (context.mounted) {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
                             builder: (context) {
                               return HomeScreen(
-                                cityName: cityName,
-                                latitude: latitude,
-                                longitude: longitude,
+                                cityName: cityName ?? 'Semarang',
+                                latitude: latitude ?? -7.059662,
+                                longitude: longitude ?? 110.439135,
                               );
                             },
                           ),
