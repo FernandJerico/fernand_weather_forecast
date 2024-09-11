@@ -4,9 +4,11 @@ import 'dart:convert';
 
 import 'package:fernand_weather_forecast/presentation/home/pages/home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
 
 import '../../../core/constant/colors.dart';
 import 'package:http/http.dart' as http;
@@ -25,6 +27,80 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
   late GoogleMapController _mapController;
   LatLng? _lastTappedLatLng;
   final Set<Marker> _markers = {};
+
+  double? latitude;
+  double? longitude;
+
+  Future<void> getCurrentPosition() async {
+    try {
+      Location location = Location();
+
+      bool serviceEnabled;
+      PermissionStatus permissionGranted;
+      LocationData locationData;
+
+      serviceEnabled = await location.serviceEnabled();
+      if (!serviceEnabled) {
+        serviceEnabled = await location.requestService();
+        if (!serviceEnabled) {
+          return;
+        }
+      }
+
+      permissionGranted = await location.hasPermission();
+      if (permissionGranted == PermissionStatus.denied) {
+        permissionGranted = await location.requestPermission();
+        if (permissionGranted != PermissionStatus.granted) {
+          return;
+        }
+      }
+
+      locationData = await location.getLocation();
+      setState(() {
+        latitude = locationData.latitude;
+        longitude = locationData.longitude;
+
+        if (latitude != null && longitude != null) {
+          _markers.add(
+            Marker(
+              markerId: const MarkerId("current_location"),
+              position: LatLng(latitude!, longitude!),
+              infoWindow: const InfoWindow(
+                title: 'Current Location',
+              ),
+            ),
+          );
+        }
+      });
+    } on PlatformException catch (e) {
+      if (e.code == 'IO_ERROR') {
+        debugPrint(
+            'A network error occurred trying to lookup the supplied coordinates: ${e.message}');
+      } else {
+        debugPrint('Failed to lookup coordinates: ${e.message}');
+      }
+    } catch (e) {
+      debugPrint('An unknown error occurred: $e');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getCurrentPosition();
+    if (widget.latitude != null && widget.longitude != null) {
+      _markers.add(
+        Marker(
+          markerId: const MarkerId("initial_marker"),
+          position: LatLng(widget.latitude!, widget.longitude!),
+          infoWindow: const InfoWindow(
+            title: 'Current Location',
+          ),
+          icon: BitmapDescriptor.defaultMarker,
+        ),
+      );
+    }
+  }
 
   Future<String?> getPlaceName(double lat, double lng) async {
     final url =
@@ -49,12 +125,16 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    LatLng initialCameraPosition = LatLng(
+      widget.latitude ?? latitude ?? 0,
+      widget.longitude ?? longitude ?? 0,
+    );
     return Scaffold(
       body: SafeArea(
         child: Stack(
           children: [
             SizedBox(
-              child: widget.latitude == null
+              child: (latitude == null && widget.latitude == null)
                   ? const Center(
                       child: CircularProgressIndicator(
                         color: AppColors.primary,
@@ -65,7 +145,7 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
                         _mapController = controller;
                       },
                       initialCameraPosition: CameraPosition(
-                        target: LatLng(widget.latitude!, widget.longitude!),
+                        target: initialCameraPosition,
                         zoom: 18.0,
                       ),
                       markers: _markers,
