@@ -68,6 +68,9 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
               infoWindow: const InfoWindow(
                 title: 'Current Location',
               ),
+              onTap: () {
+                _showCoordinatesDialog(LatLng(latitude!, longitude!));
+              },
             ),
           );
         }
@@ -97,6 +100,9 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
             title: 'Current Location',
           ),
           icon: BitmapDescriptor.defaultMarker,
+          onTap: () {
+            _showCoordinatesDialog(LatLng(widget.latitude!, widget.longitude!));
+          },
         ),
       );
     }
